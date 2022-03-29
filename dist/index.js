@@ -33,14 +33,14 @@ function probarconexion(connection) {
         catch (error) {
             console.error('Unable to connect to the database:', error);
         }
-        yield connection.sequelize.sync();
-        const cuentaCaja = yield cuenta_1.default.create({
-            nombre: 'Caja',
-            tipo: 'activo',
-            debe: 200,
-            haber: 0,
-        });
-        console.log(cuentaCaja.toJSON());
+        // await connection.sequelize.sync();
+        // const cuentaCaja = await Cuenta.create({
+        //     nombre: 'Caja',
+        //     tipo: 'activo',
+        //     debe: 200,
+        //     haber: 0,
+        // });
+        // console.log(cuentaCaja.toJSON());
     });
 }
 const connection = db_connection_1.default.instancia;
@@ -49,3 +49,47 @@ const server = server_1.default.instancia;
 server.start(() => {
     console.log(`El servidor está corriendo en el puerto ${server.port}`);
 });
+server.app.get('/', (req, res) => {
+    res.send('Hello students!');
+});
+//----------------------------------
+// Crear una cuenta
+//----------------------------------
+server.app.post('/cuentas', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // console.log(req.body);
+    const nuevaCuenta = req.body;
+    yield connection.sequelize.sync();
+    const cuenta = yield cuenta_1.default.create(nuevaCuenta);
+    res.send('Se ha creado una cuenta');
+}));
+//----------------------------------
+// Listar cuentas
+//----------------------------------
+server.app.get('/cuentas', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const cuentas = yield cuenta_1.default.findAll();
+    res.send(cuentas);
+}));
+//----------------------------------
+// Recuperar info de una cuenta
+//----------------------------------
+server.app.get('/cuentas/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const cuenta = yield cuenta_1.default.findByPk(req.params.id);
+    res.send(cuenta);
+}));
+//----------------------------------
+// Aumentar el debito de una cuenta
+//----------------------------------
+server.app.put('/cuentas/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    yield cuenta_1.default.update({ debe: req.body.debe }, {
+        where: {
+            id: req.params.id
+        }
+    });
+    // Actualizar toda la cuenta:
+    // await Cuenta.update(req.body, {
+    //   where: {
+    //     id: req.params.id
+    //   }
+    // });
+    res.send('El debito de la cuenta se ha actualizado');
+}));

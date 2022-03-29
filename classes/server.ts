@@ -11,6 +11,7 @@ export default class Server {
         this.app = express();
         this.port = 80;
         this.httpServer = new http.Server(this.app);
+        this.app.use(express.json());
     }
 
     public static get instancia() {
